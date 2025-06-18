@@ -1,0 +1,157 @@
+import time
+import os
+
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def exibir_labirinto(jogador_pos, labirinto):
+    labirinto_temp = [linha[:] for linha in labirinto]
+    x, y = jogador_pos
+    labirinto_temp[x][y] = '♙'
+    print("🌟 LABIRINTO 🌟")
+    for linha in labirinto_temp:
+        print(" ".join(linha))
+
+def mover_jogador(pos, movimento, labirinto, tem_chave):
+    x, y = pos
+    novo_x, novo_y = x, y
+
+    if movimento == 'w':
+        novo_x -= 1
+    elif movimento == 's':
+        novo_x += 1
+    elif movimento == 'a':
+        novo_y -= 1
+    elif movimento == 'd':
+        novo_y += 1
+    else:
+        print("Movimento inválido. Use apenas W, A, S ou D.")
+        time.sleep(1)
+        return pos, tem_chave
+
+    if 0 <= novo_x < len(labirinto) and 0 <= novo_y < len(labirinto[0]):
+        destino = labirinto[novo_x][novo_y]
+        if destino == '#':
+            print("Parede! Você não pode passar por aqui.")
+            time.sleep(1)
+        elif destino == '♖':
+            print("Você encontrou a chave no baú! Agora pode abrir a porta.")
+            tem_chave = True
+            labirinto[novo_x][novo_y] = '.'
+            return (novo_x, novo_y), tem_chave
+        elif destino == '▣':
+            if tem_chave:
+                print("Você usou a chave e abriu a porta!")
+                labirinto[novo_x][novo_y] = '.'
+                return (novo_x, novo_y), tem_chave
+            else:
+                print("A porta está trancada. Você precisa da chave.")
+                time.sleep(1)
+        else:
+            return (novo_x, novo_y), tem_chave
+    else:
+        print("Movimento fora dos limites.")
+        time.sleep(1)
+
+    return pos, tem_chave
+
+def jogar(nome):
+    labirinto = [
+        ['.', '.', '.', '#', '.'],
+        ['.', '#', '.', '#', '.'],
+        ['.', '.', '.', '#', '.'],
+        ['#', '#', '.', '.', '▣'],
+        ['♖', '.', '.', '#', '♔']
+    ]
+    
+    jogador_pos = (0, 0)
+    objetivo = (4, 4)
+    movimentos = 0
+    max_movimentos = 30
+    tem_chave = False
+
+    inicio = time.time()
+
+    while True:
+        limpar_tela()
+        exibir_labirinto(jogador_pos, labirinto)
+        print(f"Movimentos restantes: {max_movimentos - movimentos}")
+        movimento = input("Digite o movimento (W, A, S ou D): ").lower()
+
+        if movimento not in ['w', 'a', 's', 'd']:
+            print("Comando inválido. Use apenas W, A, S ou D.")
+            time.sleep(1)
+            continue
+
+        jogador_pos, tem_chave = mover_jogador(jogador_pos, movimento, labirinto, tem_chave)
+        movimentos += 1
+
+        if jogador_pos == objetivo:
+            if labirinto[3][4] != '.':
+                print("Você precisa abrir a porta antes de vencer!")
+                time.sleep(2)
+                continue
+            tempo_total = round(time.time() - inicio, 2)
+            limpar_tela()
+            exibir_labirinto(jogador_pos, labirinto)
+            print(f"Parabéns, {nome}! Você venceu!")
+            print(f"Tempo total: {tempo_total} segundos | Movimentos: {movimentos}")
+            break
+
+        if movimentos >= max_movimentos:
+            print("Você excedeu o número máximo de movimentos. Tente novamente!")
+            tentar = input("Deseja tentar novamente? [S/N]: ").lower()
+            if tentar == 's':
+                jogar(nome)
+            else:
+                print("Obrigado por jogar! Até a próxima!")
+            break
+
+print("Olá, jogador!")
+print("--------------------")
+time.sleep(1)
+
+nome = input("Para iniciarmos o jogo, informe o seu nome: ")
+print("--------------------")
+print(f"Bem vindo ao COURT LABYRINTH, {nome}!")
+print("--------------------")
+time.sleep(2)
+
+print("Para iniciarmos o jogo, você precisa apenas saber como funciona:")
+print("--------------------")
+time.sleep(1)
+print('- Para andar para a DIREITA, use a tecla "D"')
+time.sleep(1)
+print('- Para andar para a ESQUERDA, use a tecla "A"')
+time.sleep(1)
+print('- Para andar para BAIXO, use a tecla "S"')
+time.sleep(1)
+print('- Para andar para CIMA, use a tecla "W"')
+time.sleep(1)
+print('- Você precisa encontrar a CHAVE (♖), abrir a PORTA (▣), e então chegar ao final (♔)')
+print("--------------------")
+time.sleep(2)
+
+entendeu = None
+while entendeu != "s":
+    entendeu = input("Você entendeu as regras? [S/N]: ").lower()
+    if entendeu == "s":
+        print("Ótimo! Vamos começar o jogo!")
+        print("--------------------")
+        time.sleep(1)
+    else:
+        print("Sem problemas! Vamos revisar as regras de novo.\n")
+        time.sleep(1)
+        print('- Para andar para a DIREITA, use a tecla "D"')
+        time.sleep(1)
+        print('- Para andar para a ESQUERDA, use a tecla "A"')
+        time.sleep(1)
+        print('- Para andar para BAIXO, use a tecla "S"')
+        time.sleep(1)
+        print('- Para andar para CIMA, use a tecla "W"')
+        time.sleep(1)
+        print('- Você precisa encontrar a CHAVE (♖), abrir a PORTA (▣), e então chegar ao final (♔)')
+        time.sleep(1)
+        print("--------------------")
+
+jogar(nome)
